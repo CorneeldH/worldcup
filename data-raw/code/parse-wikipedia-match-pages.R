@@ -651,6 +651,9 @@ extract_match_data <- function(file) {
     
     # Matches --------------------------------------------------------------------
     
+    # Extract group stage from file name
+    group_stage = str_detect(file, "[Gg]roup")
+    
     # Extract scores
     matches <- tibble(
         match_id = match_ids,
@@ -673,6 +676,7 @@ extract_match_data <- function(file) {
     # Code match variables
     matches <- matches %>%
         mutate(
+            group_stage = group_stage,
             extra_time = score %>%
                 str_detect("a.e.t.") %>%
                 as.numeric(),
@@ -702,7 +706,7 @@ extract_match_data <- function(file) {
                 str_extract("[0-9]+:[0-9]+")
         ) %>%
         select(
-            match_id, home_team_name, away_team_name, match_date, match_time,
+            match_id, group_stage, home_team_name, away_team_name, match_date, match_time,
             score, home_team_score, away_team_score,
             extra_time, penalty_shootout,
             score_penalties, home_team_score_penalties, away_team_score_penalties
@@ -793,10 +797,6 @@ files <- list.files("data-raw/Wikipedia-match-pages", full.names = TRUE)
 
 # 2022 has incomplete line-ups by time of writing
 files_without_2022 <- files %>% discard(.p = str_detect, pattern = "2022")
-
-
-files_1938 <- files %>% keep(.p = str_detect, pattern = "1938")
-
 
 # Parse files
 data_raw <- parse_match_files(files_without_2022)
