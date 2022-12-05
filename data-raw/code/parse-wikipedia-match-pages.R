@@ -451,6 +451,11 @@ extract_match_data <- function(file) {
     # Print file name to the console
     cat(file, "\n")
     
+    ## Get tournament type from file
+    sTournament_possible_type <- "(world|euro|copa)"
+    
+    tournament_type <- str_extract(file, sTournament_possible_type) 
+    
     # Extract data from HTML ------------------------------------------------------
     
     # Read in the HTML code
@@ -543,6 +548,8 @@ extract_match_data <- function(file) {
         lineups = team_data %>%
             bind_rows(.id = "team_id") %>%
             mutate(
+                tournament_type = tournament_type,
+                year = year,
                 team_id = as.numeric(team_id)
             )
         
@@ -566,7 +573,7 @@ extract_match_data <- function(file) {
         # Organize variables
         lineups <- lineups %>%
             select(
-                match_id, team_name,
+                match_id, team_name, tournament_type, year,
                 player_name, player_wikipedia_link,
                 shirt_number, position_code,
                 starting, on_bench, captain, events
@@ -580,7 +587,11 @@ extract_match_data <- function(file) {
     # Extract goals
     goals = event_data %>%
         map("goals") %>%
-        bind_rows(.id = "match_id")
+        bind_rows(.id = "match_id") %>%
+        mutate(
+            tournament_type = tournament_type,
+            year = year
+        )
     
     if (year >= 1970) {
         
@@ -609,7 +620,7 @@ extract_match_data <- function(file) {
     # Organize variables
     goals <- goals %>%
         select(
-            match_id, team_name,
+            match_id, team_name, tournament_type, year,
             player_name, player_wikipedia_link, shirt_number,
             minute_label, penalty, own_goal
         )
@@ -621,7 +632,11 @@ extract_match_data <- function(file) {
         # Extract penalty kicks
         penalty_kicks = event_data %>%
             map("penalty_kicks") %>%
-            bind_rows(.id = "match_id")
+            bind_rows(.id = "match_id") %>%
+            mutate(
+                tournament_type = tournament_type,
+                year = year
+            )
         
         # Add shirt numbers to penalty kick data
         if (nrow(penalty_kicks) > 0) {
@@ -638,7 +653,7 @@ extract_match_data <- function(file) {
             )
             penalty_kicks <- penalty_kicks %>%
                 select(
-                    match_id, team_name,
+                    match_id, team_name, tournament_type, year,
                     player_name, player_wikipedia_link, shirt_number,
                     converted
                 )
@@ -652,7 +667,7 @@ extract_match_data <- function(file) {
     # Matches --------------------------------------------------------------------
     
     # Extract group stage from file name
-    group_stage = str_detect(file, "[Gg]roup")
+    group_stage <- str_detect(file, "[Gg]roup")
     
     # Extract scores
     matches <- tibble(
@@ -677,6 +692,8 @@ extract_match_data <- function(file) {
     matches <- matches %>%
         mutate(
             group_stage = group_stage,
+            year = year,
+            tournament_type = tournament_type,
             extra_time = score %>%
                 str_detect("a.e.t.") %>%
                 as.numeric(),
@@ -706,10 +723,9 @@ extract_match_data <- function(file) {
                 str_extract("[0-9]+:[0-9]+")
         ) %>%
         select(
-            match_id, group_stage, home_team_name, away_team_name, match_date, match_time,
-            score, home_team_score, away_team_score,
-            extra_time, penalty_shootout,
-            score_penalties, home_team_score_penalties, away_team_score_penalties
+            match_id, tournament_type, year, group_stage, home_team_name, away_team_name, 
+            match_date, match_time, score, home_team_score, away_team_score, extra_time, 
+            penalty_shootout, score_penalties, home_team_score_penalties, away_team_score_penalties
         )
     
     # Referees -------------------------------------------------------------------
@@ -745,6 +761,8 @@ extract_match_data <- function(file) {
     # Clean missing links
     referees <- referees %>%
         mutate(
+            tournament_type = tournament_type,
+            year = year,
             referee_wikipedia_link = case_when(
                 is.na(referee_wikipedia_link) ~ "not available",
                 str_detect(referee_wikipedia_link, "redlink") ~ "not available",
