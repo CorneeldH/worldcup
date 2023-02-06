@@ -785,7 +785,7 @@ extract_match_data <- function(file) {
 
 # Function to parse files
 parse_match_files <- function(files) {
-    raw <- map(files_with_2022, extract_match_data)
+    raw <- map(files, extract_match_data)
     return(
         list(
             matches = raw %>%
@@ -921,23 +921,20 @@ table(goals_by_team$n == goals_by_team$score)
 # Check for missing data -------------------------------------------------------
 
 table(is.na(wikipedia_matches))
-
-# Games have besides numeric score more information so away score fails
+#' *INFO* Games have besides numeric score more information so away score fails
 # wikipedia_matches %>% filter(is.na(away_team_score))
 
 table(is.na(wikipedia_goals))
 # wikipedia_goals %>% filter(is.na(shirt_number))
 
 table(is.na(wikipedia_penalty_kicks))
-
 # wikipedia_penalty_kicks %>% filter(is.na(shirt_number))
 
 table(is.na(wikipedia_lineups))
 
 table(is.na(wikipedia_referees))
-
 # wikipedia_referees %>% filter(is.na(referee_country))
-# Game was not played so no referee
+#' *INFO* Game was not played so no referee
 
 # Save data --------------------------------------------------------------------
 
