@@ -291,7 +291,7 @@ extract_event_data <- function(html_table) {
                 html_text2() %>%
                 str_split("\\n") %>%
                 unlist() %>%
-                str_remove(".mw-parser-output") %>%
+                str_remove_all(".mw-parser-output.*?\\}") %>%
                 str_remove(".fb.*?\\}") %>%
                 str_remove_all("\\[[0-9]+\\]") %>%
                 str_squish() %>%
@@ -785,7 +785,7 @@ extract_match_data <- function(file) {
 
 # Function to parse files
 parse_match_files <- function(files) {
-    raw <- map(files, extract_match_data)
+    raw <- map(files_with_2022, extract_match_data)
     return(
         list(
             matches = raw %>%
@@ -814,10 +814,10 @@ parse_match_files <- function(files) {
 files <- list.files("data-raw/Wikipedia-match-pages", full.names = TRUE)
 
 # 2022 has incomplete line-ups by time of writing
-files_without_2022 <- files %>% discard(.p = str_detect, pattern = "2022")
+files_with_2022 <- files %>% keep(.p = str_detect, pattern = "2022")
 
 # Parse files
-data_raw <- parse_match_files(files_without_2022)
+data_raw <- parse_match_files(files_with_2022)
 
 # Extract tables
 wikipedia_matches <- data_raw$matches
