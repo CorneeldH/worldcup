@@ -314,7 +314,7 @@ extract_event_data <- function(html_table) {
                 html_text2() %>%
                 str_split("\\n") %>%
                 unlist() %>%
-                str_remove(".mw-parser-output") %>%
+                str_remove_all(".mw-parser-output.*?\\}") %>%
                 str_remove(".fb.*?\\}") %>%
                 str_remove_all("\\[[0-9]+\\]") %>%
                 str_squish() %>% 
@@ -813,11 +813,11 @@ parse_match_files <- function(files) {
 # Get file names
 files <- list.files("data-raw/Wikipedia-match-pages", full.names = TRUE)
 
-# 2022 has incomplete line-ups by time of writing
+#' *INFO* Code for just adding the last world cup
 files_with_2022 <- files %>% keep(.p = str_detect, pattern = "2022")
 
 # Parse files
-data_raw <- parse_match_files(files_with_2022)
+data_raw <- parse_match_files(files)
 
 # Extract tables
 wikipedia_matches <- data_raw$matches
